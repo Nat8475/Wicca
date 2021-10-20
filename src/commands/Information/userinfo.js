@@ -23,7 +23,11 @@ module.exports = class UserInfo extends Command {
     moment.locale("pt-BR");
 
     try {
-      const user = message.guild.member(this.client.users.cache.get(args[0]) || message.mentions.members.first() || message.author);
+      const user = message.mentions.users.first() ||
+      this.client.users.cache.get(args[0]) ||
+      message.author;
+
+      const doc = await this.client.database.users.findOne({ idU: user.id });
 
       const flags = [];
       this.Flags(user, flags);
@@ -34,6 +38,7 @@ module.exports = class UserInfo extends Command {
       let presence;
       if (!user.presence.activities.length) presence = "Não está jogando nada";
       else presence = user.presence.activities.join(", ");
+
 
       const device = this.Device(user);
       const joined = `${moment(user.joinedAt).format("L")} ( ${moment(
@@ -89,11 +94,11 @@ module.exports = class UserInfo extends Command {
 
   //================> Parte de Pegar as Badges
 
-  Flags(user, flags) {
+  Flags(user, flags, doc) {
     let list;
     if (this.client.users.cache.get(user.id).flags == null) list = "";
-    else
-      list = this.client.users.cache
+  
+    else list = this.client.users.cache
         .get(user.id)
         .flags.toArray()
         .join("")
@@ -110,8 +115,7 @@ module.exports = class UserInfo extends Command {
   //================> Parte de Pegar os Cargos
 
   Roles(user, roles, message) {
-    const ROLES = message.guild
-      .member(user.id)
+    const ROLES = message.guild.members.cache.get(user.id)
       .roles.cache.filter((r) => r.id !== message.guild.id)
       .map((roles) => roles);
     let list;

@@ -2,3 +2,4 @@ package-lock.json
 .chache/
 .npm/
 node_modules/
+.env/
